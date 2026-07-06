@@ -331,10 +331,6 @@
             '</div>' +
             '<h3 class="in-other-words-head">In Other Words</h3>' +
             '<p class="plate-desc">' + (IOW[card.code] || card.desc) + '</p>' +
-            '<div class="modal-actions">' +
-              '<a class="btn" href="#/card/' + card.code + '">Visit Card Page &rarr;</a>' +
-              '<button class="btn btn-dim modal-dismiss">Close</button>' +
-            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -344,8 +340,6 @@
     function close(){ overlay.remove(); }
     overlay.addEventListener("click", function(e){ if(e.target === overlay) close(); });
     overlay.querySelector(".modal-close").addEventListener("click", close);
-    overlay.querySelector(".modal-dismiss").addEventListener("click", close);
-    overlay.querySelector(".modal-actions a").addEventListener("click", close);
 
     document.addEventListener("keydown", function onKey(e){
       if(e.key === "Escape"){ close(); document.removeEventListener("keydown", onKey); }
