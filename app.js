@@ -148,6 +148,19 @@
     return h % CARDS.length;
   }
 
+  var ENERGY_FACTS = [
+    "run a microwave for about a minute",
+    "charge a phone to roughly 90%",
+    "run a 10W LED bulb for under two hours",
+    "run a WiFi router for about 4–5 hours",
+    "charge a laptop for about 15 minutes",
+    "run an electric toothbrush charger for a few hours",
+    "run a ceiling fan on low for about 20 minutes",
+    "keep a Bluetooth speaker playing for a couple of hours",
+    "run a toaster for under a minute",
+    "run a space heater for about 30 seconds"
+  ];
+
   // ---------- rendering: home ----------
   function renderHome(){
     document.querySelector(".site-head").style.display = "none";
@@ -160,12 +173,30 @@
         '<a class="btn btn-lg" href="#/directory">Full Card List</a>' +
         '<button class="btn btn-lg" id="btn-random">Pull a Random Card</button>' +
         '<a class="btn btn-lg btn-dim" href="#/pull">Want to do a full pull?</a>' +
-      '</div>';
+      '</div>' +
+      '<p class="energy-note">This site was built with the amount of energy it takes to<br><span class="energy-fact"></span></p>';
     app.innerHTML = "";
     app.appendChild(el);
+
     document.getElementById("btn-random").addEventListener("click", function(){
       showCardModal(CARDS[Math.floor(Math.random() * CARDS.length)]);
     });
+
+    var factEl = el.querySelector(".energy-fact");
+    var idx = Math.floor(Math.random() * ENERGY_FACTS.length);
+    factEl.textContent = ENERGY_FACTS[idx] + ".";
+
+    var timer = setInterval(function(){
+      factEl.style.opacity = "0";
+      setTimeout(function(){
+        idx = (idx + 1) % ENERGY_FACTS.length;
+        factEl.textContent = ENERGY_FACTS[idx] + ".";
+        factEl.style.opacity = "1";
+      }, 400);
+    }, 3500);
+
+    // clear interval when user navigates away
+    window.addEventListener("hashchange", function(){ clearInterval(timer); }, { once: true });
   }
 
   function todayLabel(){
