@@ -357,11 +357,18 @@
         '<button class="add-card-btn" id="add-card-btn">' +
           '<span class="add-icon">+</span>Add Card' +
         '</button>' +
+        '<button class="clear-cards-btn" id="clear-cards-btn">Clear All</button>' +
         '<span class="pull-count" id="pull-count"></span>' +
       '</div>' +
       '<div class="pull-grid" id="pull-grid"></div>';
     app.innerHTML = "";
     app.appendChild(el);
+
+    document.getElementById("clear-cards-btn").addEventListener("click", function(){
+      Object.keys(drawnCodes).forEach(function(k){ delete drawnCodes[k]; });
+      document.getElementById("pull-grid").innerHTML = "";
+      document.getElementById("pull-count").textContent = "";
+    });
 
     document.getElementById("add-card-btn").addEventListener("click", function(){
       var available = CARDS.filter(function(c){ return !drawnCodes[c.code]; });

@@ -250,6 +250,19 @@ button.btn{
   transition:background .15s, color .15s;
 }
 .add-card-btn:hover{background:var(--brass);color:var(--ink);}
+.clear-cards-btn{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding:11px 18px;
+  border:1px solid var(--rule);
+  color:var(--text-dim);
+  background:none;
+  cursor:pointer;
+  transition:border-color .15s, color .15s;
+}
+.clear-cards-btn:hover{border-color:var(--wax);color:var(--wax);}
 .add-icon{
   font-size:20px;
   line-height:1;
