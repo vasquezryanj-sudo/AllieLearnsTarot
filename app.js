@@ -122,7 +122,7 @@
 
   function withFallback(imgEl, card){
     imgEl.addEventListener("error", function(){
-      var frame = imgEl.closest(".card-tile-frame, .feature-frame, .plate-frame");
+      var frame = imgEl.closest(".card-tile-frame, .feature-frame, .plate-frame, .modal-frame, .pull-card-frame");
       if(!frame) return;
       imgEl.remove();
       frame.classList.add("no-image");
@@ -150,33 +150,21 @@
 
   // ---------- rendering: home ----------
   function renderHome(){
-    var card = CARDS[dayIndex()];
     var el = document.createElement("div");
+    el.className = "home-hero";
     el.innerHTML =
-      '<p class="eyebrow">Featured card — ' + todayLabel() + '</p>' +
-      '<div class="feature">' +
-        '<div class="feature-frame">' +
-          '<span class="feature-tag">' + catalogTag(card) + '</span>' +
-          '<img src="' + filePath(card.img, 480) + '" alt="' + card.name + '">' +
-        '</div>' +
-        '<div class="feature-body">' +
-          '<h1>' + card.name + '</h1>' +
-          '<p class="feature-sub">' + subLabel(card) + '</p>' +
-          '<div class="meaning-pair">' +
-            '<div><h3>Upright</h3><p>' + card.up + '</p></div>' +
-            '<div><h3>Reversed</h3><p>' + card.rev + '</p></div>' +
-          '</div>' +
-          '<div class="astro-row">' +
-            '<h3>Astrological Sign</h3>' +
-            '<p>' + astroLabel(card) + '</p>' +
-          '</div>' +
-          '<p class="feature-desc">' + (IOW[card.code] || firstSentences(card.desc, 2)) + '</p>' +
-        '</div>' +
-      '</div>' +
-      '<p class="home-note">One card surfaces each day, the same for anyone visiting. The full set of 78 lives in the directory.</p>';
+      '<h1 class="home-hero-title">Allie Learns Tarot<br>with Her Big, Smart Brain</h1>' +
+      '<p class="home-hero-sub">Easier than the LSAT, Just as Fun</p>' +
+      '<div class="home-buttons">' +
+        '<a class="btn btn-lg" href="#/directory">Full Card List</a>' +
+        '<button class="btn btn-lg" id="btn-random">Pull a Random Card</button>' +
+        '<a class="btn btn-lg btn-dim" href="#/pull">Want to do a full pull?</a>' +
+      '</div>';
     app.innerHTML = "";
     app.appendChild(el);
-    withFallback(el.querySelector(".feature-frame img"), card);
+    document.getElementById("btn-random").addEventListener("click", function(){
+      showCardModal(CARDS[Math.floor(Math.random() * CARDS.length)]);
+    });
   }
 
   function todayLabel(){
@@ -318,8 +306,109 @@
     });
   }
 
+  // ---------- modal ----------
+  function showCardModal(card){
+    var overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML =
+      '<div class="modal-box">' +
+        '<button class="modal-close" aria-label="Close">&times;</button>' +
+        '<div class="modal-inner">' +
+          '<div class="modal-frame">' +
+            '<img src="' + filePath(card.img, 340) + '" alt="' + card.name + '">' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<p class="plate-catalog">' + subLabel(card) + '</p>' +
+            '<h2 class="modal-title">' + card.name + '</h2>' +
+            '<div class="meaning-pair">' +
+              '<div><h3>Upright</h3><p>' + card.up + '</p></div>' +
+              '<div><h3>Reversed</h3><p>' + card.rev + '</p></div>' +
+            '</div>' +
+            '<div class="astro-row">' +
+              '<h3>Astrological Sign</h3>' +
+              '<p>' + astroLabel(card) + '</p>' +
+            '</div>' +
+            '<h3 class="in-other-words-head">In Other Words</h3>' +
+            '<p class="plate-desc">' + (IOW[card.code] || card.desc) + '</p>' +
+            '<div class="modal-actions">' +
+              '<a class="btn" href="#/card/' + card.code + '">Visit Card Page &rarr;</a>' +
+              '<button class="btn btn-dim modal-dismiss">Close</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    withFallback(overlay.querySelector(".modal-frame img"), card);
+
+    function close(){ overlay.remove(); }
+    overlay.addEventListener("click", function(e){ if(e.target === overlay) close(); });
+    overlay.querySelector(".modal-close").addEventListener("click", close);
+    overlay.querySelector(".modal-dismiss").addEventListener("click", close);
+    overlay.querySelector(".modal-actions a").addEventListener("click", close);
+
+    document.addEventListener("keydown", function onKey(e){
+      if(e.key === "Escape"){ close(); document.removeEventListener("keydown", onKey); }
+    });
+  }
+
+  // ---------- rendering: pull page ----------
+  function renderPull(){
+    var drawnCodes = {};
+    var el = document.createElement("div");
+    el.className = "pull-page";
+    el.innerHTML =
+      '<h1 class="pull-title"><span class="pull-prompt">&gt;&nbsp;</span>Digital Tarot Pull<span class="pull-cursor">_</span></h1>' +
+      '<div class="pull-controls">' +
+        '<button class="add-card-btn" id="add-card-btn">' +
+          '<span class="add-icon">+</span>Add Card' +
+        '</button>' +
+        '<span class="pull-count" id="pull-count"></span>' +
+      '</div>' +
+      '<div class="pull-grid" id="pull-grid"></div>';
+    app.innerHTML = "";
+    app.appendChild(el);
+
+    document.getElementById("add-card-btn").addEventListener("click", function(){
+      var available = CARDS.filter(function(c){ return !drawnCodes[c.code]; });
+      if(!available.length){
+        document.getElementById("pull-count").textContent = "— full deck drawn";
+        return;
+      }
+      var card = available[Math.floor(Math.random() * available.length)];
+      drawnCodes[card.code] = true;
+      var drawn = Object.keys(drawnCodes).length;
+      document.getElementById("pull-count").textContent = drawn + " of 78 drawn";
+      addPullCard(card, document.getElementById("pull-grid"));
+    });
+  }
+
+  function addPullCard(card, grid){
+    var tile = document.createElement("button");
+    tile.className = "pull-card";
+    tile.setAttribute("aria-label", card.name);
+    tile.innerHTML =
+      '<div class="pull-card-frame">' +
+        '<img src="' + filePath(card.img, 220) + '" alt="' + card.name + '">' +
+      '</div>' +
+      '<div class="pull-card-label">' + card.name + '</div>';
+    tile.addEventListener("click", function(){ showCardModal(card); });
+    grid.appendChild(tile);
+    withFallback(tile.querySelector(".pull-card-frame img"), card);
+    // brief entrance animation
+    tile.style.opacity = "0";
+    tile.style.transform = "translateY(10px)";
+    requestAnimationFrame(function(){
+      tile.style.transition = "opacity .3s, transform .3s";
+      tile.style.opacity = "1";
+      tile.style.transform = "translateY(0)";
+    });
+  }
+
   // ---------- router ----------
   function route(){
+    // dismiss any open modal when navigating
+    document.querySelectorAll(".modal-overlay").forEach(function(m){ m.remove(); });
+
     var hash = location.hash || "#/";
     var navLinks = document.querySelectorAll(".site-nav a");
     navLinks.forEach(function(a){ a.classList.remove("active"); });
@@ -330,6 +419,8 @@
     } else if(hash === "#/directory"){
       renderDirectory();
       var t2 = document.querySelector('[data-route="directory"]'); if(t2) t2.classList.add("active");
+    } else if(hash === "#/pull"){
+      renderPull();
     } else if(hash.indexOf("#/card/") === 0){
       renderCard(hash.replace("#/card/", ""));
     } else {
