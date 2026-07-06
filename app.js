@@ -352,7 +352,7 @@
     var el = document.createElement("div");
     el.className = "pull-page";
     el.innerHTML =
-      '<h1 class="pull-title"><span class="pull-prompt">&gt;&nbsp;</span>Digital Tarot Pull<span class="pull-cursor">_</span></h1>' +
+      '<h1 class="pull-title">Digital Tarot Pull <span class="pull-cursor">✦</span></h1>' +
       '<div class="pull-controls">' +
         '<button class="add-card-btn" id="add-card-btn">' +
           '<span class="add-icon">+</span>Add Card' +
