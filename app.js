@@ -150,6 +150,7 @@
 
   // ---------- rendering: home ----------
   function renderHome(){
+    document.querySelector(".site-head").style.display = "none";
     var el = document.createElement("div");
     el.className = "home-hero";
     el.innerHTML =
@@ -408,6 +409,7 @@
   function route(){
     // dismiss any open modal when navigating
     document.querySelectorAll(".modal-overlay").forEach(function(m){ m.remove(); });
+    document.querySelector(".site-head").style.display = "";
 
     var hash = location.hash || "#/";
     var navLinks = document.querySelectorAll(".site-nav a");
