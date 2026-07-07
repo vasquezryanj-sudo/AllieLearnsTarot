@@ -167,7 +167,7 @@
     var el = document.createElement("div");
     el.className = "home-hero";
     el.innerHTML =
-      '<h1 class="home-hero-title">Allie Learns Tarot<br>with her big smart brain</h1>' +
+      '<h1 class="home-hero-title">Allie Learns Tarot</h1>' +
       '<p class="home-hero-sub">Easier than the LSAT, just as fun</p>' +
       '<div class="home-buttons">' +
         '<a class="btn btn-lg" href="#/directory">Full Card List</a>' +
