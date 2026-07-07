@@ -380,6 +380,7 @@
   // ---------- rendering: pull page ----------
   function renderPull(){
     var drawnCodes = {};
+    var drawnCards = [];
     var el = document.createElement("div");
     el.className = "pull-page";
     el.innerHTML =
@@ -391,14 +392,21 @@
         '<button class="clear-cards-btn" id="clear-cards-btn">Clear All</button>' +
         '<span class="pull-count" id="pull-count"></span>' +
       '</div>' +
-      '<div class="pull-grid" id="pull-grid"></div>';
+      '<div class="pull-grid" id="pull-grid"></div>' +
+      '<div class="read-spread-wrap" id="read-spread-wrap" style="display:none">' +
+        '<button class="read-spread-btn" id="read-spread-btn">✦ Read My Spread</button>' +
+      '</div>' +
+      '<div class="spread-reading" id="spread-reading"></div>';
     app.innerHTML = "";
     app.appendChild(el);
 
     document.getElementById("clear-cards-btn").addEventListener("click", function(){
       Object.keys(drawnCodes).forEach(function(k){ delete drawnCodes[k]; });
+      drawnCards = [];
       document.getElementById("pull-grid").innerHTML = "";
       document.getElementById("pull-count").textContent = "";
+      document.getElementById("read-spread-wrap").style.display = "none";
+      document.getElementById("spread-reading").innerHTML = "";
     });
 
     document.getElementById("add-card-btn").addEventListener("click", function(){
@@ -409,9 +417,17 @@
       }
       var card = available[Math.floor(Math.random() * available.length)];
       drawnCodes[card.code] = true;
-      var drawn = Object.keys(drawnCodes).length;
+      drawnCards.push(card);
+      var drawn = drawnCards.length;
       document.getElementById("pull-count").textContent = drawn + " of 78 drawn";
       addPullCard(card, document.getElementById("pull-grid"));
+      if(drawn >= 2){
+        document.getElementById("read-spread-wrap").style.display = "flex";
+      }
+    });
+
+    document.getElementById("read-spread-btn").addEventListener("click", function(){
+      fetchReading(drawnCards, document.getElementById("spread-reading"), this);
     });
   }
 
@@ -427,7 +443,6 @@
     tile.addEventListener("click", function(){ showCardModal(card); });
     grid.appendChild(tile);
     withFallback(tile.querySelector(".pull-card-frame img"), card);
-    // brief entrance animation
     tile.style.opacity = "0";
     tile.style.transform = "translateY(10px)";
     requestAnimationFrame(function(){
@@ -435,6 +450,53 @@
       tile.style.opacity = "1";
       tile.style.transform = "translateY(0)";
     });
+  }
+
+  function fetchReading(cards, readingEl, btn){
+    btn.disabled = true;
+    btn.textContent = "Reading the cards…";
+    readingEl.innerHTML = '<p class="reading-loading">Consulting the spread — give it a moment ✦</p>';
+    readingEl.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    var payload = cards.map(function(c){
+      return { name: c.name, arcana: c.arcana, suit: c.suit, up: c.up, rev: c.rev };
+    });
+
+    fetch("/.netlify/functions/interpret", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cards: payload })
+    })
+    .then(function(r){
+      if(!r.ok) throw new Error(r.status);
+      return r.json();
+    })
+    .then(function(data){
+      readingEl.innerHTML = formatReading(data.text);
+      btn.disabled = false;
+      btn.textContent = "✦ Read My Spread Again";
+    })
+    .catch(function(){
+      readingEl.innerHTML = '<p class="reading-error">The cards went quiet — check your connection and try again.</p>';
+      btn.disabled = false;
+      btn.textContent = "✦ Read My Spread";
+    });
+  }
+
+  function formatReading(text){
+    var lines = text.split("\n");
+    var html = '<div class="spread-reading-inner">';
+    lines.forEach(function(line){
+      line = line.trim();
+      if(!line) return;
+      if(line.startsWith("## ")){
+        html += '<h3 class="reading-head">' + line.slice(3) + '</h3>';
+      } else {
+        html += '<p class="reading-p">' + line + '</p>';
+      }
+    });
+    html += '</div>';
+    return html;
   }
 
   // ---------- router ----------
