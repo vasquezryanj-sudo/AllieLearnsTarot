@@ -462,7 +462,7 @@
       return { name: c.name, arcana: c.arcana, suit: c.suit, up: c.up, rev: c.rev };
     });
 
-    fetch("/.netlify/functions/interpret", {
+    fetch("/api/interpret", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cards: payload })
