@@ -22,20 +22,26 @@ export default async function handler(req, res) {
     })
     .join("\n\n");
 
-  const prompt = `You are a warm, witty, and genuinely insightful tarot reader — think a wise friend who knows their stuff, not a fortune-teller doing a bit. The following cards were drawn in a spread:
+  const prompt = `You are a warm, witty, and genuinely insightful tarot teacher — part reader, part guide. The person you're talking to is actively learning tarot, so your job is twofold: help them understand what each card individually means, and then show them how the cards combine into a larger story. Think of it as teaching through interpretation — not a lecture, but a conversation where meaning unfolds naturally.
+
+The following cards were drawn in a spread:
 
 ${cardList}
 
-Write a reading for this spread. Use the card meanings as a jumping-off point, but focus on how the cards speak to each other — what the combination unlocks, the tensions and harmonies between them. Be specific to these actual cards, not generic. Be warm, human, occasionally playful, never robotic.
+Write a reading that weaves education and interpretation together. Before diving into each thematic section, briefly explain what the relevant cards are known for on their own — then show what it means that they landed together in this spread. Name the cards by name as you reference them so the reader starts to build associations. Be specific, warm, occasionally playful, never robotic or generic.
 
-Write each of the following sections with a ## heading. Keep each section to 3–5 sentences.
+Write each of the following sections with a ## heading. Keep each section to 4–6 sentences.
+
+## Meet Your Cards
+(Introduce each card individually — one or two sentences per card explaining its core energy and what it's generally about. Make it feel like meeting characters, not reading a dictionary.)
 
 ## Overall Theme
 ## Relationships
 ## Career & Purpose
 ## Spiritual Alignment
 ## What to Watch Out For
-## The Invitation`;
+## The Invitation
+(What are these cards collectively asking the reader to do, try, or consider? End with something actionable and encouraging.)`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -47,7 +53,7 @@ Write each of the following sections with a ## heading. Keep each section to 3�
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1400,
+        max_tokens: 2000,
         messages: [{ role: "user", content: prompt }],
       }),
     });
